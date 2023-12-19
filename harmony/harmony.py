@@ -30,6 +30,7 @@ def harmonize(
     use_gpu: bool = False,
     n_jobs: int = -1,
     verbose: bool = True,
+    weights: np.array,
 ) -> np.array:
     """
     Integrate data using Harmony algorithm.
@@ -171,6 +172,7 @@ def harmonize(
         None,
         device_type,
         n_jobs,
+        weights,
     )
 
     if verbose:
@@ -226,6 +228,7 @@ def initialize_centroids(
     device_type,
     n_jobs,
     n_init=10,
+    weights,
 ):
     n_cells = Z_norm.shape[0]
 
@@ -259,7 +262,7 @@ def initialize_centroids(
 
     objectives_harmony = []
     compute_objective(
-        Y_norm, Z_norm, R, theta, sigma, O, E, objectives_harmony, device_type
+        Y_norm, Z_norm, R, theta, sigma, O, E, objectives_harmony, device_type,weights
     )
 
     return R, E, O, objectives_harmony
@@ -398,13 +401,15 @@ def correction_fast(X, R, Phi, O, ridge_lambda, device_type):
 
 
 def compute_objective(
-    Y_norm, Z_norm, R, theta, sigma, O, E, objective_arr, device_type
+    Y_norm, Z_norm, R, theta, sigma, O, E, objective_arr, device_type,weights
 ):
-    kmeans_error = torch.sum(R * 2 * (1 - torch.matmul(Z_norm, Y_norm.t())))
+    kmeans_error = torch.sum(torch.matmul(weights,R * 2 * (1 - torch.matmul(Z_norm, Y_norm.t()))))
     entropy_term = sigma * torch.sum(-torch.distributions.Categorical(probs=R).entropy())
     diversity_penalty = sigma * torch.sum(
-        torch.matmul(theta, O * torch.log(torch.div(O + 1, E + 1)))
-    )
+        torch.matmul(
+            weights,
+            torch.matmul(theta, O * torch.log(torch.div(O + 1, E + 1)))
+    ))
     objective = kmeans_error + entropy_term + diversity_penalty
 
     objective_arr.append(objective)
