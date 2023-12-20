@@ -3,7 +3,8 @@ import torch
 import numpy as np
 import pandas as pd
 
-
+import sklearn
+import scipy
 from sklearn.cluster import KMeans
 from torch.nn.functional import normalize
 from typing import Union, List
@@ -30,7 +31,7 @@ def harmonize(
     use_gpu: bool = False,
     n_jobs: int = -1,
     verbose: bool = True,
-    weights: np.array,
+    weights: np.array = None,
 ) -> np.array:
     """
     Integrate data using Harmony algorithm.
@@ -228,7 +229,7 @@ def initialize_centroids(
     device_type,
     n_jobs,
     n_init=10,
-    weights,
+    weights = None,
 ):
     n_cells = Z_norm.shape[0]
 
