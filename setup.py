@@ -17,7 +17,7 @@ requires = [
 ]
 
 setup(
-    name="harmony-pytorch",
+    name="imbalance-harmony-pytorch",
     use_scm_version=True,
     description="Pytorch implementation of Harmony algorithm on single-cell sequencing data integration",
     long_description=long_description,
